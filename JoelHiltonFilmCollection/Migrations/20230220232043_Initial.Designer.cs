@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JoelHiltonFilmCollection.Migrations
 {
     [DbContext(typeof(MovieContext))]
-    [Migration("20230214063125_Initial")]
+    [Migration("20230220232043_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -17,16 +17,58 @@ namespace JoelHiltonFilmCollection.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.32");
 
+            modelBuilder.Entity("JoelHiltonFilmCollection.Models.Category", b =>
+                {
+                    b.Property<int>("CategoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CategoryName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("CategoryID");
+
+                    b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            CategoryID = 1,
+                            CategoryName = "Science Fiction"
+                        },
+                        new
+                        {
+                            CategoryID = 2,
+                            CategoryName = "Horror"
+                        },
+                        new
+                        {
+                            CategoryID = 3,
+                            CategoryName = "Romance"
+                        },
+                        new
+                        {
+                            CategoryID = 4,
+                            CategoryName = "Comedy"
+                        },
+                        new
+                        {
+                            CategoryID = 5,
+                            CategoryName = "Drama"
+                        });
+                });
+
             modelBuilder.Entity("JoelHiltonFilmCollection.Models.FormResponse", b =>
                 {
                     b.Property<int>("FormId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Category")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("CategoryID")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Director")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Edited")
@@ -39,9 +81,11 @@ namespace JoelHiltonFilmCollection.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Rating")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Year")
@@ -49,13 +93,15 @@ namespace JoelHiltonFilmCollection.Migrations
 
                     b.HasKey("FormId");
 
+                    b.HasIndex("CategoryID");
+
                     b.ToTable("Responses");
 
                     b.HasData(
                         new
                         {
                             FormId = 1,
-                            Category = "Science Fiction",
+                            CategoryID = 1,
                             Director = "George Lucas",
                             Edited = false,
                             Rating = "PG-13",
@@ -65,7 +111,7 @@ namespace JoelHiltonFilmCollection.Migrations
                         new
                         {
                             FormId = 2,
-                            Category = "Science Fiction",
+                            CategoryID = 1,
                             Director = "Irvin Kershner",
                             Edited = false,
                             Rating = "PG-13",
@@ -75,13 +121,22 @@ namespace JoelHiltonFilmCollection.Migrations
                         new
                         {
                             FormId = 3,
-                            Category = "Science Fiction",
+                            CategoryID = 1,
                             Director = "Richard Marquand",
                             Edited = false,
                             Rating = "PG-13",
                             Title = "Return of the Jedi",
                             Year = 1983
                         });
+                });
+
+            modelBuilder.Entity("JoelHiltonFilmCollection.Models.FormResponse", b =>
+                {
+                    b.HasOne("JoelHiltonFilmCollection.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

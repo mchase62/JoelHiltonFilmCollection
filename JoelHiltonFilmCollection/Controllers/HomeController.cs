@@ -1,5 +1,6 @@
 ﻿using JoelHiltonFilmCollection.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -11,16 +12,15 @@ namespace JoelHiltonFilmCollection.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private MovieContext _blahContext { get; set; }
+        private MovieContext movieContext { get; set; }
+
         //Constructor
-        public HomeController(ILogger<HomeController> logger, MovieContext someName)
+        public HomeController(MovieContext someName)
         {
-            _logger = logger;
-            _blahContext = someName;
+            movieContext = someName;
         }
 
-        public IActionResult Index()
+        public IActionResult Index() // home page
         {
             return View();
         }
@@ -28,29 +28,70 @@ namespace JoelHiltonFilmCollection.Controllers
         [HttpGet]
         public IActionResult MovieForm ()
         {
-            return View();
+            ViewBag.Categories = movieContext.Categories.ToList(); // automatically passes to view parameter
+            return View(new FormResponse());
         }
         [HttpPost]
         public IActionResult MovieForm(FormResponse fr)
         {
-            _blahContext.Add(fr);
-            _blahContext.SaveChanges();
-            return View("Confirmation", fr);
+            if(ModelState.IsValid)
+            {
+                movieContext.Add(fr); // add to movies
+                movieContext.SaveChanges();
+                return View("Confirmation", fr);
+            }
+            else
+            {
+                ViewBag.Categories = movieContext.Categories.ToList(); // automatically passes to view parameter
+                return View(fr);
+            }
         }
         
         public IActionResult Podcasts()
         {
             return View();
         }
-        public IActionResult Privacy()
+        
+        [HttpGet]
+        public IActionResult MovieList()
         {
-            return View();
+            var movies = movieContext.Responses
+                .Include(x => x.Category)
+                .OrderBy(x => x.Year)
+                .ToList(); // our movie list
+            return View(movies);
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [HttpGet]
+        public IActionResult Edit(int id)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            ViewBag.Categories = movieContext.Categories.ToList(); // automatically passes to view parameter, fills in the category drop down
+            var form = movieContext.Responses.Single(x => x.FormId == id); // get the form id from the url, lets us choose which row
+            return View("MovieForm", form);
+        }
+
+        [HttpPost] // in order to update the form with the data in the get view
+        public IActionResult Edit (FormResponse fr)
+        {
+            movieContext.Update(fr);
+            movieContext.SaveChanges();
+            return RedirectToAction("MovieList"); // jump back into full IActionResult for movielist, not just the view
+        }
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var form = movieContext.Responses.Single(x => x.FormId == id);
+            return View(form);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(FormResponse fr)
+        {
+            movieContext.Responses.Remove(fr);
+            movieContext.SaveChanges();
+
+            return RedirectToAction("MovieList");
         }
     }
 }

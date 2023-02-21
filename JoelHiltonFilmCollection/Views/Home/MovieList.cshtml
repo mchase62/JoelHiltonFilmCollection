@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Movie List";
+}
+<!-- choosing the model -->
+@model List<FormResponse>
+
+<table class="table table-bordered table-striped">
+
+    <thead class ="font-weight-bold">
+        <!-- Table Header -->
+        <tr>
+            <!-- Table row -->
+            <td>Category</td>
+            <td>Title</td>
+            <td>Year</td>
+            <td>Director</td>
+            <td>Rating</td>
+            <td>Edited</td>
+            <td>Lent To</td>
+            <td>Notes</td>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Table body -->
+        @foreach (var x in Model) // using the type of model
+        {
+        <tr>
+            <td>@x.Category.CategoryName</td>
+            <td>@x.Title</td>
+            <td>@x.Year</td>
+            <td>@x.Director</td>
+            <td>@x.Rating</td>
+            <td>@x.Edited</td>
+            <td>@x.LentTo</td>
+            <td>@x.Notes</td>
+
+            <td><a asp-controller="Home" asp-action="Edit" asp-route-id="@x.FormId">Edit</a></td>
+            <td><a asp-controller="Home" asp-action="Delete" asp-route-id="@x.FormId">Delete</a></td>
+        </tr>
+        }
+    </tbody>
+</table>
